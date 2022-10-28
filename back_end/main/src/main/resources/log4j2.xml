@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="DEBUG">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %p %c{10} [%t] Message -> %m%n" />
+        </Console>
+
+        <RollingFile name="RollingFile" fileName="logs/app.log"
+            filePattern="logs/app-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} %p %c{10} [%t] Message -> %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="sqlRollingFile" fileName="logs/app-sqls.log"
+            filePattern="logs/app-sqls-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} %p %c{10} [%t] SQL -> %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="systemErrorRollingFile" fileName="logs/app-errors.log"
+            filePattern="logs/app-errors-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} %p %c{10} [%t] ERROR -> %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+        </RollingFile>
+
+    </Appenders>
+    <Loggers>
+
+        <Logger name="druid.sql.Statement" level="debug" additivity="false">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="sqlRollingFile" />
+        </Logger>
+
+        <Logger name="com.filesystem" level="warn" additivity="false">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="systemErrorRollingFile" />
+        </Logger>
+
+        <Root level="debug">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="RollingFile" />
+        </Root>
+    </Loggers>
+</Configuration>
