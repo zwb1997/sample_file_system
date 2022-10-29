@@ -3,8 +3,13 @@ import "./MainComponent.css";
 import {
   initializeFileTypeIcons,
   getFileTypeIconProps,
-  FileIconType,
 } from "@fluentui/react-file-type-icons";
+
+
+import app_cofig from '../config/Config.js';
+
+
+import axios from "axios";
 import { Icon as Ficon } from "@fluentui/react";
 import moment from "moment";
 import {
@@ -14,27 +19,14 @@ import {
   Skeleton,
   Avatar,
   List,
-  Descriptions,
-  Rating,
-  ButtonGroup,
-  Divider,
   AutoComplete,
 } from "@douyinfe/semi-ui";
 import {
   IconSemiLogo,
   IconBytedanceLogo,
-  IconHome,
-  IconSearch,
 } from "@douyinfe/semi-icons";
 
-const FileTypes = [
-  { name: "xlsx" },
-  { name: "xls" },
-  { name: "csv" },
-  { name: "doc" },
-  { name: "docx" },
-  { name: "pdf" },
-];
+import ContentSiderComponent from './content_sider/ContentSiderComponent.js';
 
 initializeFileTypeIcons();
 
@@ -42,28 +34,8 @@ class MainComponent extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      itemFileLists: [
-        {
-          itemKey: "西水泉村",
-          text: "西水泉村",
-          icon: <IconHome size="large" />,
-        },
-        {
-          itemKey: "xx村1",
-          text: "xx村1",
-          icon: <IconHome size="large" />,
-        },
-        {
-          itemKey: "xx村2",
-          text: "xx村2",
-          icon: <IconHome size="large" />,
-        },
-        {
-          itemKey: "xx村3",
-          text: "xx村3",
-          icon: <IconHome size="large" />,
-        },
-      ],
+      villageLoadingFlag: true,
+      villageTypeList: [],
       currentUser: {
         name: "YD",
       },
@@ -143,7 +115,8 @@ class MainComponent extends React.Component {
   }
 
   randomFileType() {
-    return FileTypes[Math.floor(Math.random() * FileTypes.length)].name;
+    let ft = app_cofig.fileTypes;
+    return ft[Math.floor(Math.random() * ft)].name;
   }
   whenSelectionChanged = () => {
     console.log("change");
@@ -151,7 +124,7 @@ class MainComponent extends React.Component {
 
   render() {
     let state = this.state;
-    const { Header, Footer, Sider, Content } = Layout;
+    const { Header, Footer, Content } = Layout;
 
     return (
       // 容器整体
@@ -167,8 +140,6 @@ class MainComponent extends React.Component {
                 <span className="span_2">村工作文件管理系统</span>
               </span>
 
-              <div>something else</div>
-
               <Nav.Footer>
                 <Avatar color="orange" size="small">
                   {state.currentUser.name}
@@ -180,30 +151,22 @@ class MainComponent extends React.Component {
 
         {/* 内容区域 */}
         <Layout className="main-layout">
-          <Sider style={{ backgroundColor: "var(--semi-color-bg-1)" }}>
-            <Nav
-              style={{ maxWidth: 220, height: "100%" }}
-              defaultSelectedKeys={[]}
-              items={state.itemFileLists}
-              footer={{
-                collapseButton: true,
-              }}
-            />
-          </Sider>
+
+
+          <ContentSiderComponent
+            villageTypeList={state.villageTypeList}
+          />
+
           <Content className="main-content">
             <div className="search-box">
-              <AutoComplete
-              placeholder="输入文件名"
-              size="large"
-               />
+              <AutoComplete placeholder="输入文件名" size="large" />
             </div>
-            {state.loadingFlag ? (
-              <Skeleton
-                placeholder={<Skeleton.Paragraph rows={6} />}
-                loading={state.loadingFlag}
-                active
-              />
-            ) : (
+
+            <Skeleton
+              placeholder={<Skeleton.Paragraph rows={6} />}
+              loading={state.loadingFlag}
+              active
+            >
               <div className="list-item-container">
                 <List
                   className="item-list"
@@ -222,27 +185,40 @@ class MainComponent extends React.Component {
                             imageFileType: "png",
                           })}
                         />
-                        <div className="item-style">文件名 {item.fileName}</div>
                         <div className="item-style">
-                          文件类型 {item.fileType}
+                          <div>文件名</div>
+                          <span>{item.fileName}</span>
                         </div>
-                        <div className="item-style">{item.upLoadedBy}上传</div>
+
                         <div className="item-style">
-                          上传时间 {item.uploadTime}
+                          <div>文件类型</div>
+                          <span>{item.fileType}</span>
                         </div>
-                        <div className="item-action-style">
-                          <span>Action:</span>
+
+                        <div className="item-style">
+                          <div>上传用户</div>
+                          <span>{item.upLoadedBy}</span>
+                        </div>
+
+                        <div className="item-style">
+                          <div>上传时间</div>
+                          <span>{item.uploadTime}</span>
+                        </div>
+
+                        <div className="item-style">
+                          <div>Action:</div>
                           <div className="item-action-button-style">
                             <Button>检视</Button>
                             <Button>下载</Button>
                           </div>
                         </div>
+
                       </div>
                     </List.Item>
                   )}
                 ></List>
               </div>
-            )}
+            </Skeleton>
           </Content>
         </Layout>
 
@@ -255,7 +231,7 @@ class MainComponent extends React.Component {
             }}
           >
             <IconBytedanceLogo size="large" style={{ marginRight: "8px" }} />
-            <span>Copyright © 2019. Power by semi. Design by vince</span>
+            <span>{app_cofig.footerContent}</span>
           </span>
         </Footer>
       </Layout>
