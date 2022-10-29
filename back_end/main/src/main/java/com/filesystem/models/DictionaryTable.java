@@ -5,17 +5,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DictionaryTable {
 
-    private long id;
+    private String uuid;
     private String codeName;
     private String codeValue;
     private int codeState;
 
-    public long getId() {
-        return id;
+    public String getUuid() {
+        return uuid;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getCodeName() {
@@ -44,7 +44,7 @@ public class DictionaryTable {
 
     @Override
     public String toString() {
-        return "DictionaryTable [id=" + id + ", codeName=" + codeName + ", codeValue=" + codeValue + ", codeState="
+        return "DictionaryTable [uuid=" + uuid + ", codeName=" + codeName + ", codeValue=" + codeValue + ", codeState="
                 + codeState + "]";
     }
 

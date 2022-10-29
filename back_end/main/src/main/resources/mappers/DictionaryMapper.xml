@@ -1,28 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper
-    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.filesystem.mapper.DictionaryMapper">
 
     <resultMap id="baseMap" type="com.filesystem.models.DictionaryTable">
-        <id  property="id" column="id"/>
-        <result property="codeName" column="code_name" jdbcType="VARCHAR"/>
-        <result property="codeValue" column="code_value" jdbcType="VARCHAR"/>
-        <result property="codeState" column="code_state"/>
+        <id property="uuid" column="uuid" />
+        <result property="codeName" column="code_name" jdbcType="VARCHAR" />
+        <result property="codeValue" column="code_value" jdbcType="VARCHAR" />
+        <result property="codeState" column="code_state" />
     </resultMap>
 
-
     <select id="searchCodeByName" parameterType="java.lang.String" resultMap="baseMap">
-        SELECT
-            d.id,
-            d.code_name,
-            d.code_value,
-            d.code_state
-        FROM dictionary d
-            WHERE 1=1
-        <if test="codeName != null and codeName != ''">
-            AND d.code_name LIKE CONCAT(#{codeName},'%')
-        </if>
+        SELECT 
+            d.uuid, 
+            d.code_name, 
+            d.code_value, 
+            d.code_state 
+        FROM dictionary d 
+            WHERE d.code_state = 1
+        <if test="codeName != null and codeName != ''">AND d.code_name LIKE CONCAT(#{codeName},'%')</if>
+            ORDER BY d.uuid
     </select>
+
+    <update id="disableDictionary" parameterType="com.filesystem.models.DictionaryTable">
+        UPDATE dictionary d
+            SET
+                d.code_state = 0
+            WHERE d.uuid = #{dictionary.uuid}
+
+    </update>
+
+
+    <select id="queryDicByIds" parameterType="java.util.List" resultMap="baseMap">
+        SELECT
+            d.uuid, 
+            d.code_name, 
+            d.code_value, 
+            d.code_state 
+        FROM dictionary d 
+            WHERE d.uuid IN
+            <foreach collection="ids" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+    </select>
+
+
+    <insert id="insertNewDics" parameterType="java.util.List">
+        INSERT INTO dictionary(`uuid`,`code_name`,`code_value`,`code_state`)
+        VALUES
+        <foreach collection="dictionaries" item="item" open="" separator="," close=";">
+            (#{item.uuid},#{item.codeName},#{item.codeValue},1)
+        </foreach>
+
+    </insert>
 </mapper>

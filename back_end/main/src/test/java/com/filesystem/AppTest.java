@@ -16,7 +16,7 @@ public class AppTest {
 
     @Test
     public void createFile() {
-        File file = new File("D:\\demo.txt");
+        File file = new File("demo.txt");
 
         try {
             if (file.createNewFile()) {
@@ -31,7 +31,7 @@ public class AppTest {
 
     @Test
     public void createFileByFileSteam() throws Exception {
-        try (var f = new FileInputStream(new File("c:\\demo.tgxt"))) {
+        try (var f = new FileInputStream(new File("demo.tgxt"))) {
             System.out.println("succeed");
         } catch (Exception e) {
             System.out.println("failed message:" + e.getMessage());
@@ -41,7 +41,7 @@ public class AppTest {
     @Test
     public void testCreateFileWithPrivilege() {
 
-        try (FileOutputStream fos = new FileOutputStream(new File("C:\\demo.txt"))) {
+        try (FileOutputStream fos = new FileOutputStream(new File("demo.txt"))) {
             String words = "hello!";
             fos.write(words.getBytes());
             fos.flush();

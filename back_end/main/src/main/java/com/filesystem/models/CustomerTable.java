@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CustomerTable {
 
-    private long id;
+    private String uuid;
 
     private String customerName;
 
@@ -15,12 +15,12 @@ public class CustomerTable {
 
     private String state;
 
-    public long getId() {
-        return id;
+    public String getUuid() {
+        return uuid;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getCustomerName() {
@@ -57,7 +57,7 @@ public class CustomerTable {
 
     @Override
     public String toString() {
-        return "CustomerTable [id=" + id + ", customerName=" + customerName + ", customerPass=" + customerPass
+        return "CustomerTable [uuid=" + uuid + ", customerName=" + customerName + ", customerPass=" + customerPass
                 + ", createTime=" + createTime + ", state=" + state + "]";
     }
 

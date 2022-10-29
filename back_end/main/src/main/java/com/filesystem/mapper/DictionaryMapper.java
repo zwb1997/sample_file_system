@@ -11,4 +11,10 @@ import com.filesystem.models.DictionaryTable;
 public interface DictionaryMapper {
 
     public List<DictionaryTable> searchCodeByName(@Param("codeName") String codeName);
+
+    public int disableDictionary(@Param("dictionary") DictionaryTable dictionary);
+
+    public List<DictionaryTable> queryDicByIds(@Param("ids") List<String> ids);
+
+    public int insertNewDics(@Param("dictionaries") List<DictionaryTable> dictionaries);
 }
