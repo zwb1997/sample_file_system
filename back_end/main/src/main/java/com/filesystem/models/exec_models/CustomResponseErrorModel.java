@@ -1,4 +1,4 @@
-package com.filesystem.models.execmodels;
+package com.filesystem.models.exec_models;
 
 public class CustomResponseErrorModel {
 

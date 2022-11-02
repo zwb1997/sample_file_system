@@ -2,7 +2,6 @@ package com.filesystem.services;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -11,11 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+
 import com.filesystem.mapper.DictionaryMapper;
 import com.filesystem.models.DictionaryTable;
-import com.filesystem.models.EmptyObject;
+import com.filesystem.models.request_model.DictionaryRequestModel;
 import com.filesystem.utils.AppUtil;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 
 /**
  * dictionary service
@@ -37,14 +40,17 @@ public class DictionaryService {
      * @param codeName
      * @return
      */
-    public List<DictionaryTable> getDictionaries(String codeName) {
+    @Transactional
+    public PageInfo<DictionaryTable> getDictionaries(DictionaryRequestModel requestModel) {
 
-        if (StringUtils.isBlank(codeName)) {
-            codeName = StringUtils.EMPTY;
+        if (StringUtils.isBlank(requestModel.getCodeName())) {
+
+            requestModel.setCodeName(StringUtils.EMPTY);
         }
-        List<DictionaryTable> resultList = dictionaryMapper.searchCodeByName(codeName);
 
-        return resultList;
+        PageInfo<DictionaryTable> result = PageHelper.startPage(requestModel.getPageNum(), requestModel.getPageSize())
+                .doSelectPageInfo(() -> dictionaryMapper.searchCodeByName(requestModel.getCodeName()));
+        return result;
     }
 
     /**
@@ -64,6 +70,8 @@ public class DictionaryService {
             dictionaryMapper.disableDictionary(v);
             ids.add(v.getUuid());
         });
+
+        // after delete, show the full data result state
         List<DictionaryTable> afterUpdateModels = dictionaryMapper.queryDicByIds(ids);
         return afterUpdateModels;
     }
@@ -84,6 +92,7 @@ public class DictionaryService {
         });
 
         dictionaryMapper.insertNewDics(dictionaries);
+        // after insert, show the full data result state
         List<DictionaryTable> afterUpdateModels = dictionaryMapper.queryDicByIds(newIds);
         return afterUpdateModels;
     }

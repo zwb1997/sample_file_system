@@ -1,7 +1,10 @@
 package com.filesystem.config;
 
 import java.util.Properties;
+
 import javax.sql.DataSource;
+
+import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,9 +18,12 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+
 import com.alibaba.druid.pool.DruidDataSource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.filesystem.consts.ApplicationConsts;
+import com.github.pagehelper.PageInterceptor;
 
 @Configuration
 public class AppConfiguration {
@@ -39,6 +45,10 @@ public class AppConfiguration {
     @Bean(name = "SqlSessionFactory")
     public SqlSessionFactory setSqlSessionFactory() throws Exception {
         SqlSessionFactoryBean sfb = new SqlSessionFactoryBean();
+
+        PageInterceptor pagePlugin = new PageInterceptor();
+        pagePlugin.setProperties(getMybatisPageHelperConfiguration());
+        sfb.setPlugins(new Interceptor[] { pagePlugin });
         sfb.setConfigurationProperties(getMybatisConfiguration());
         sfb.setFailFast(true);
         sfb.setMapperLocations(
@@ -54,6 +64,13 @@ public class AppConfiguration {
     private Properties getMybatisConfiguration() {
         Properties props = new Properties();
         props.setProperty("mapUnderscoreToCamelCase", "true");
+        return props;
+    }
+
+    private Properties getMybatisPageHelperConfiguration() {
+
+        Properties props = new Properties();
+        props.setProperty("debug", "true");
         return props;
     }
 
@@ -83,6 +100,13 @@ public class AppConfiguration {
     @Bean
     public NamedParameterJdbcTemplate createNamedParameterJdbcTemplate() {
         return new NamedParameterJdbcTemplate(dataSource);
+    }
+
+    @Bean("multipartResolver")
+    public CommonsMultipartResolver setMultipartResolver() {
+        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
+        multipartResolver.setMaxUploadSize(2048 * 1000 * 100);
+        return multipartResolver;
     }
 
 }

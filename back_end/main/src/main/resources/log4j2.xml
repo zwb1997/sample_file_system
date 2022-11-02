@@ -43,12 +43,7 @@
             <AppenderRef ref="sqlRollingFile" />
         </Logger>
 
-        <Logger name="com.filesystem" level="warn" additivity="false">
-            <AppenderRef ref="Console" />
-            <AppenderRef ref="systemErrorRollingFile" />
-        </Logger>
-
-        <Root level="INFO">
+        <Root level="DEBUG">
             <AppenderRef ref="Console" />
             <AppenderRef ref="RollingFile" />
         </Root>

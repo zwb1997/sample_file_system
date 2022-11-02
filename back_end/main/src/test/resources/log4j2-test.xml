@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="DEBUG">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="TEST - %d{yyyy-MM-dd HH:mm:ss} %p %c{10} [%t] Message -> %m%n" />
+        </Console>
+
+        <RollingFile name="RollingFile" fileName="logs/tests/app-test.log"
+            filePattern="logs/tests/app-test-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} %p %c{10} [%t] Test -> %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+        </RollingFile>
+
+    </Appenders>
+    <Loggers>
+
+        <Logger name="druid.sql.Statement" level="debug" additivity="false">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="sqlRollingFile" />
+        </Logger>
+
+        <Root level="INFO">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="RollingFile" />
+        </Root>
+    </Loggers>
+</Configuration>

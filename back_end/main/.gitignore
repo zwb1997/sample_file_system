@@ -204,3 +204,5 @@ buildNumber.properties
 /.vscode
 demo.txt
 *.key
+
+/data/*

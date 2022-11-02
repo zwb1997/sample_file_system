@@ -1,13 +1,33 @@
 package com.filesystem;
 
 import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
+import com.filesystem.services.CustomerService;
+import com.filesystem.services.DocumentService;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = { App.class })
 public class AppTest {
+
+    private static final Logger LOG = LogManager.getLogger(AppTest.class);
+
+    @Autowired
+    private CustomerService customerService;
+
+    @Autowired
+    private DocumentService documentService;
 
     @Test
     public void shouldAnswerWithTrue() {
@@ -41,7 +61,7 @@ public class AppTest {
     @Test
     public void testCreateFileWithPrivilege() {
 
-        try (FileOutputStream fos = new FileOutputStream(new File("demo.txt"))) {
+        try (FileOutputStream fos = new FileOutputStream(new File("D:\\demo.txt"))) {
             String words = "hello!";
             fos.write(words.getBytes());
             fos.flush();
@@ -50,4 +70,8 @@ public class AppTest {
         }
     }
 
+    @Test
+    public void testTransactionService() {
+
+    }
 }

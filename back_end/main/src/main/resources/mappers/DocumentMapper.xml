@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.filesystem.mapper.DocumentMapper">
+    <resultMap id="baseMap" type="com.filesystem.models.DocumentTable">
+        <id property="uuid" column="uuid" />
+        <result property="fileName" column="file_name" />
+        <result property="fileType" column="file_type" />
+        <result property="filePath" column="file_path" />
+        <result property="createTime" column="create_time" />
+        <result property="createCustomer" column="create_customer" />
+        <result property="updatedTime" column="updated_time" />
+        <result property="deleteTime" column="delete_time" />
+        <result property="fileSize" column="file_size" />
+        <result property="villageType" column="village_type" />
+        <result property="stateCode" column="state_code" />
+    </resultMap>
+
+    <select id="queryDocuments" resultMap="baseMap">
+
+    SELECT
+            wf.`uuid`,
+            wf.`file_name`,
+            wf.`file_type`,
+            wf.`file_path`,
+            wf.`create_time`,
+            wf.`create_customer`,
+            wf.`state_code`,
+            wf.`updated_time`,
+            wf.`delete_time`,
+            wf.`file_size`,
+            wf.`village_type`,
+            d.code_value AS villageName
+    FROM
+        work_files wf,
+        dictionary d
+    WHERE
+        wf.`state_code` = 1
+        AND wf.`village_type` = d.code_name 
+        <if test="villageKey != null and villageKey != ''">
+            AND wf.village_type = #{villageKey}
+            AND d.code_name = #{villageKey}
+        </if>
+        <if test="fileName != null and fileName !=''">
+            AND wf.`file_name` LIKE CONCAT(#{fileName},'%')
+        </if>
+        ORDER BY wf.`uuid`
+    </select>
+
+    <select id="searchFilesByUUids" resultMap="baseMap">
+        SELECT
+            wf.`uuid`,
+            wf.`file_name`,
+            wf.`file_type`,
+            wf.`file_path`,
+            wf.`create_time`,
+            wf.`create_customer`,
+            wf.`state_code`,
+            wf.`updated_time`,
+            wf.`delete_time`,
+            wf.`file_size`,
+            wf.`village_type`,
+            d.code_value AS villageName
+        FROM
+            work_files wf,
+            dictionary d
+            WHERE
+                wf.`state_code` = 1
+            <if test="fileIds != null">
+                AND wf.`uuid` IN
+                <foreach collection="fileIds" item="id" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+    </select>
+
+    <insert id="insertSavedFileInfo">
+        INSERT INTO work_files
+        VALUES
+        <foreach collection="documents" item="doc" open="" separator="," close=";">
+            (#{doc.uuid},#{doc.fileName},#{doc.fileType},#{doc.filePath},#{doc.createTime},#{doc.createCustomer},#{doc.stateCode},#{doc.updatedTime},#{doc.deleteTime},#{doc.fileSize},#{doc.villageType})
+        </foreach>
+    </insert>
+</mapper>
