@@ -31,7 +31,7 @@ class ContentSiderComponent extends React.Component {
   }
 
   fetchVillageTypes = () => {
-    let requestUrl = app_cofig.baseRequestUrl + "dictionary/dics";
+    let requestUrl = app_cofig.getVillageRequestUrl;
     const { responseData, pageInfos, currentVillageTypeHandler } = this.state;
     axios
       .get(requestUrl, {
@@ -66,9 +66,7 @@ class ContentSiderComponent extends React.Component {
                 : "",
           });
 
-          currentVillageTypeHandler(
-            responseData.villageTypeList[0].itemKey,
-          );
+          currentVillageTypeHandler(responseData.villageTypeList[0].itemKey);
         } else {
           throw new Error(`request ${requestUrl} error`);
         }

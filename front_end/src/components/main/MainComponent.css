@@ -153,8 +153,26 @@
   min-width: 42px;
 }
 
-.table-icon-column-text {
+.table-icon-column-text > span{
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  max-width: 150px;
+}
+
+.file-view-container {
+  padding: 5px;
+  background-color: #cccccc2e;
+  border: 1px solid #cccccc2e;
+  border-radius: 26px;
+  height: 96%;
+}
+
+.custom-modal-body .semi-modal-body {
+  overflow-y: auto;
+}
+
+.unsupport-file-style{
+  height: 100%;
+  width: 100%;
 }
