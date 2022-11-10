@@ -40,6 +40,6 @@ public class CustomInterceptor implements HandlerInterceptor {
             LOG.info("response -> header: [{}] value -> [{}]", headerName, response.getHeader(headerName));
         });
         LOG.info("request end time -> [{}]", DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss.SSS"));
-        LOG.info("================= REQUEST ==============");
+        LOG.info("================= REQUEST END ==============");
     }
 }

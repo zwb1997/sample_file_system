@@ -66,6 +66,8 @@
             dictionary d
             WHERE
                 wf.`state_code` = 1
+                AND wf.village_type = #{villageType}
+                AND d.code_name = #{villageType}
             <if test="fileIds != null">
                 AND wf.`uuid` IN
                 <foreach collection="fileIds" item="id" open="(" close=")" separator=",">
@@ -81,4 +83,42 @@
             (#{doc.uuid},#{doc.fileName},#{doc.fileType},#{doc.filePath},#{doc.createTime},#{doc.createCustomer},#{doc.stateCode},#{doc.updatedTime},#{doc.deleteTime},#{doc.fileSize},#{doc.villageType})
         </foreach>
     </insert>
+
+
+    <select id="queryFileByUUIDWithoutState" resultMap="baseMap">
+        SELECT
+        wf.`uuid`,
+        wf.`file_name`,
+        wf.`file_type`,
+        wf.`file_path`,
+        wf.`create_time`,
+        wf.`create_customer`,
+        wf.`state_code`,
+        wf.`updated_time`,
+        wf.`delete_time`,
+        wf.`file_size`,
+        wf.`village_type`,
+        d.code_value AS villageName
+    FROM
+        work_files wf,
+        dictionary d
+        WHERE
+            wf.village_type = #{villageType}
+            AND d.code_name = #{villageType}
+            <if test="fileIds != null">
+                AND wf.`uuid` IN
+                <foreach collection="fileIds" item="id" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+    </select>
+
+    <update id="disableCurrentFile">
+        UPDATE 
+            work_files wf 
+            SET 
+                wf.state_code = #{doc.stateCode},
+                wf.delete_time = #{doc.deleteTime}
+                WHERE wf.`uuid` = #{doc.uuid}
+    </update>
 </mapper>

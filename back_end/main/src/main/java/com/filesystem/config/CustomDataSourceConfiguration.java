@@ -45,7 +45,7 @@ public class CustomDataSourceConfiguration {
         dataSource.setInitialSize(5);
         dataSource.setMinIdle(1);
         dataSource.setMaxActive(10);
-        dataSource.setMaxWait(6000);
+        dataSource.setMaxWait(60000);
         dataSource.setTimeBetweenEvictionRunsMillis(60000);
         dataSource.setMinEvictableIdleTimeMillis(300000);
         dataSource.setTestWhileIdle(true);

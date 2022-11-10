@@ -1,16 +1,18 @@
 package com.filesystem.config;
 
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.MediaType;
-import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.filesystem.interceptors.CustomInterceptor;
 
 @Configuration
-@EnableWebMvc
+// @EnableWebMvc
+@ComponentScan(basePackageClasses = { CustomMVCConfiguration.class })
 public class CustomMVCConfiguration implements WebMvcConfigurer {
 
     @Override
@@ -19,11 +21,16 @@ public class CustomMVCConfiguration implements WebMvcConfigurer {
         registry.addInterceptor(new CustomInterceptor()).addPathPatterns("/**");
     }
 
-    // @Override
-    // public void configureContentNegotiation(ContentNegotiationConfigurer
-    // configurer) {
-    // configurer.mediaType("json", MediaType.APPLICATION_JSON);
-    // configurer.mediaType("xml", MediaType.APPLICATION_XML);
-    // configurer.mediaType("pdf", MediaType.APPLICATION_PDF);
-    // }
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // TODO Auto-generated method stub
+        registry.addResourceHandler("/t_files/**")
+                .addResourceLocations("classpath:/t_files/");
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        // TODO Auto-generated method stub
+        registry.addMapping("/t_files/**").allowedOrigins("*");
+    }
 }
