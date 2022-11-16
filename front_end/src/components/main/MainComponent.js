@@ -5,13 +5,13 @@ import axios from "axios";
 import path from "path-browserify";
 import {
   initializeFileTypeIcons,
-  getFileTypeIconProps
+  getFileTypeIconProps,
 } from "@fluentui/react-file-type-icons";
-import app_cofig from '../../config/Config.js';
+import app_cofig from "../../config/Config.js";
 import moment from "moment";
 import { getFileType } from "../../utils/AppUtils.js";
 import { filesize } from "filesize";
-import FileViewer from 'react-file-viewer';
+import FileViewer from "react-file-viewer";
 import {
   Layout,
   Nav,
@@ -23,20 +23,23 @@ import {
   Toast,
   Spin,
   Tooltip,
-  Tag,
-  Empty
+  Empty,
+  Popconfirm,
 } from "@douyinfe/semi-ui";
-import { IllustrationConstruction, IllustrationConstructionDark } from '@douyinfe/semi-illustrations';
+import {
+  IllustrationConstruction,
+  IllustrationConstructionDark,
+} from "@douyinfe/semi-illustrations";
 
 import {
   IconSemiLogo,
   IconBytedanceLogo,
   IconMore,
-  IconSearch
+  IconSearch,
 } from "@douyinfe/semi-icons";
 import { Icon as Ficon } from "@fluentui/react";
-import ContentSiderComponent from './content_sider/ContentSiderComponent.js';
-import LoadFileComponment from './upload_component/LoadFileComponment.js';
+import ContentSiderComponent from "./content_sider/ContentSiderComponent.js";
+import LoadFileComponment from "./upload_component/LoadFileComponment.js";
 
 initializeFileTypeIcons();
 const DISABLE_FILE = "DISABLE";
@@ -49,7 +52,7 @@ export default class MainComponent extends React.Component {
     this.state = {
       spinObj: {
         isLoading: false,
-        content: "loading..."
+        content: "loading...",
       },
       currentVillageTypeKey: "",
       currentUser: {
@@ -58,12 +61,13 @@ export default class MainComponent extends React.Component {
       viewModel: {
         documentFlag: false,
         fileType: "",
-        fileUrl: ""
+        fileUrl: "",
       },
       autoModel: {
+        isLoading: false,
         currentVillageKey: "",
         searchData: [],
-        searchValue: ""
+        searchValue: "",
       },
       tableLoadingFlag: true,
       tableColumns: [
@@ -84,9 +88,7 @@ export default class MainComponent extends React.Component {
                   })}
                 />
                 <div className="table-icon-column-text">
-                  <Tooltip content={record.fileName}>
-                    {record.fileName}
-                  </Tooltip>
+                  <Tooltip content={record.fileName}>{record.fileName}</Tooltip>
                 </div>
               </div>
             );
@@ -126,18 +128,28 @@ export default class MainComponent extends React.Component {
                   theme="solid"
                   type="tertiary"
                   style={{ marginRight: 8 }}
-                  onClick={() => this.currentFileAction(DOWNLOAD_FILE, text, record, index)}
+                  onClick={() =>
+                    this.currentFileAction(DOWNLOAD_FILE, text, record, index)
+                  }
                 >
                   下载
                 </Button>
-                <Button
-                  theme="solid"
-                  type="tertiary"
-                  style={{ marginRight: 8 }}
-                  onClick={() => this.currentFileAction(DISABLE_FILE, text, record, index)}
+                <Popconfirm
+                  onConfirm={() => {
+                    this.currentFileAction(DISABLE_FILE, text, record, index);
+                  }}
+                  title="确定是否要保存此修改？"
+                  content="此操作将删除源文件"
+                  onCancel={()=>{Toast.info('取消删除')}}
                 >
-                  删除
-                </Button>
+                  <Button
+                    theme="solid"
+                    type="tertiary"
+                    style={{ marginRight: 8 }}
+                  >
+                    删除
+                  </Button>
+                </Popconfirm>
               </div>
             );
           },
@@ -146,24 +158,24 @@ export default class MainComponent extends React.Component {
       ],
       rowSelection: {
         onSelect: (record, selected) => {
-          console.log(`select row: ${selected}`, record);
+          // console.log(`select row: ${selected}`, record);
         },
         onSelectAll: (selected, selectedRows) => {
-          console.log(`select all rows: ${selected}`, selectedRows);
+          // console.log(`select all rows: ${selected}`, selectedRows);
         },
         onChange: (selectedRowKeys, selectedRows) => {
-          console.log(
-            `selectedRowKeys: ${selectedRowKeys}`,
-            "selectedRows: ",
-            selectedRows
-          );
+          // console.log(
+          //   `selectedRowKeys: ${selectedRowKeys}`,
+          //   "selectedRows: ",
+          //   selectedRows
+          // );
         },
       },
       tableRequestParams: {
         fileName: "",
-        villageType: '',
+        villageType: "",
         pageNum: 1,
-        pageSize: 7,
+        pageSize: 5,
       },
       responseTableData: {
         pageNum: 1,
@@ -171,12 +183,11 @@ export default class MainComponent extends React.Component {
         totalCount: 0,
         data: [],
       },
+      timeout: undefined,
     };
   }
 
-  componentDidUpdate() {
-
-  }
+  componentDidUpdate() {}
   componentDidMount() {
     this.fetchCurrentVillageTypeData();
   }
@@ -185,48 +196,64 @@ export default class MainComponent extends React.Component {
     console.log("village type change?", villageType);
     try {
       if (!villageType) {
-        throw new Error('current village type is empty');
+        throw new Error("current village type is empty");
       }
-      this.setState({
-        currentVillageTypeKey: villageType,
-        tableLoadingFlag: true
-      }, () => {
-        console.log(`current village type change! ->[${this.state.currentVillageTypeKey}]`);
-        this.fetchCurrentVillageTypeData();
-      })
+      this.setState(
+        {
+          currentVillageTypeKey: villageType,
+          tableLoadingFlag: true,
+        },
+        () => {
+          // console.log(
+          //   `current village type change! ->[${this.state.currentVillageTypeKey}]`
+          // );
+          this.fetchCurrentVillageTypeData();
+        }
+      );
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
   randomFileType() {
     let ft = app_cofig.fileTypes;
     return ft[Math.floor(Math.random() * ft)].name;
   }
   whenSelectionChanged = () => {
-    console.log("change");
+    // console.log("change");
   };
 
   renderUpLoadFileComponent = (currentVillageTypeKey) => {
     const { currentUser } = this.state;
-    return <LoadFileComponment
-      currentVillageTypeKey={currentVillageTypeKey}
-      reloadFileList={this.reloadFileList}
-      customerName={currentUser.name} />
-  }
+    return (
+      <LoadFileComponment
+        currentVillageTypeKey={currentVillageTypeKey}
+        reloadFileList={this.reloadFileList}
+        customerName={currentUser.name}
+      />
+    );
+  };
 
   reloadFileList = () => {
+    const { spinObj } = this.state;
+    this.setState({
+      tableLoadingFlag: true,
+      spinObj: {
+        isLoading: true,
+        content: spinObj.content,
+      },
+    });
     this.fetchCurrentVillageTypeData();
-  }
+  };
 
   renderContentSiderComponent = (currentVillageTypeKey) => {
-
-    return <ContentSiderComponent
-      villageTypeList={currentVillageTypeKey}
-      setCurrentVillageType={this.setCurrentVillageType}
-    />
-  }
-
+    return (
+      <ContentSiderComponent
+        villageTypeList={currentVillageTypeKey}
+        setCurrentVillageType={this.setCurrentVillageType}
+      />
+    );
+  };
 
   onPageChange = (currentPageNum) => {
     const { tableRequestParams } = this.state;
@@ -248,7 +275,12 @@ export default class MainComponent extends React.Component {
     );
   };
   fetchCurrentVillageTypeData = () => {
-    const { responseTableData, tableRequestParams, currentVillageTypeKey, spinObj } = this.state;
+    const {
+      responseTableData,
+      tableRequestParams,
+      currentVillageTypeKey,
+      spinObj,
+    } = this.state;
 
     // do get
     axios
@@ -262,31 +294,32 @@ export default class MainComponent extends React.Component {
         },
       })
       .then((res) => {
-        console.log("fetch file list", res);
+        // console.log("fetch file list", res);
         let resData = res.data.data;
         if (resData) {
           responseTableData.data = resData.list;
           responseTableData.data = responseTableData.data
             ? responseTableData.data.map((model) => {
-              let fileStrings = model.fileName
-                ? model.fileName.split(".")
-                : ["未命名", ".txt"];
-              let fName = fileStrings[0];
-              let fType = fileStrings[1];
+                let fileStrings = model.fileName
+                  ? model.fileName.split(".")
+                  : ["未命名", ".txt"];
+                let length = fileStrings.length;
+                let fName = fileStrings[0];
+                let fType = fileStrings[length - 1];
 
-              return {
-                dataID: model.uuid,
-                fileName: fName,
-                fileType: fType,
-                fileOriginalType: model.fileType,
-                fileSize: filesize(model.fileSize),
-                fileUpdater: model.createCustomer,
-                currentUpdatetime: model.createTime,
-                villageKey: model.villageType,
-                villageName: model.villageName,
-                fileLocationPath: model.filePath,
-              };
-            })
+                return {
+                  dataID: model.uuid,
+                  fileName: `${fName}.${fType}`,
+                  fileType: fType,
+                  fileOriginalType: model.fileType,
+                  fileSize: filesize(model.fileSize),
+                  fileUpdater: model.createCustomer,
+                  currentUpdatetime: model.createTime,
+                  villageKey: model.villageType,
+                  villageName: model.villageName,
+                  fileLocationPath: model.filePath,
+                };
+              })
             : [];
           responseTableData.pageNum = resData.pageNum;
           responseTableData.pageSize = resData.pageSize;
@@ -298,9 +331,18 @@ export default class MainComponent extends React.Component {
       })
       .finally(() => {
         this.setState({
+          autoModel: {
+            isLoading: false,
+          },
           spinObj: {
             isLoading: false,
-            content: spinObj.content
+            content: spinObj.content,
+          },
+          tableRequestParams: {
+            fileName: "",
+            villageType: tableRequestParams.villageType,
+            pageNum: tableRequestParams.pageNum,
+            pageSize: tableRequestParams.pageSize,
           },
           tableLoadingFlag: false,
         });
@@ -327,97 +369,104 @@ export default class MainComponent extends React.Component {
     }
   };
 
-
   disableCurrentFile = (text, record, index) => {
     const { spinObj } = this.state;
-    console.log("remove file", record);
+    // console.log("remove file", record);
     if (!record.villageKey) {
-      throw new Error("when try to disable column, villageKey is empty!")
+      throw new Error("when try to disable column, villageKey is empty!");
     }
     this.setState({
       tableLoadingFlag: true,
       spinObj: {
         isLoading: true,
-        content: spinObj.content
-      }
-    })
-    axios.get(
-      app_cofig.disableFilesRequestUrl,
-      {
-        method: 'GET',
+        content: spinObj.content,
+      },
+    });
+    axios
+      .get(app_cofig.disableFilesRequestUrl, {
+        method: "GET",
         params: {
           fileKey: record.dataID,
-          villageType: record.villageKey
-        }
-      }).then((data) => {
+          villageType: record.villageKey,
+        },
+      })
+      .then((data) => {
         let resData = data.data;
         if (resData.code === 1) {
-          Toast.success(`删除文件\t${record.fileName}\t成功`)
+          Toast.success(`删除文件\t${record.fileName}\t成功`);
         }
-
-      }).catch(error => {
-        Toast.error(`删除文件\t${record.fileName}\t失败`)
-        console.error('删除文件失败', error);
-      }).finally(() => {
+      })
+      .catch((error) => {
+        Toast.error(`删除文件\t${record.fileName}\t失败`);
+        console.error("删除文件失败", error);
+      })
+      .finally(() => {
         this.setState({
           tableLoadingFlag: false,
           spinObj: {
             isLoading: false,
-            content: spinObj.content
-          }
-        })
+            content: spinObj.content,
+          },
+        });
         this.fetchCurrentVillageTypeData();
-      })
-  }
+      });
+  };
   buildFileView = (actiontype, text, record, index) => {
     const { spinObj } = this.state;
     let fileKey = record.dataID ? record.dataID : "";
-    this.setState({
-      tableLoadingFlag: true,
-      spinObj: {
-        isLoading: true,
-        content: spinObj.content
+    this.setState(
+      {
+        tableLoadingFlag: true,
+        spinObj: {
+          isLoading: true,
+          content: spinObj.content,
+        },
+      },
+      () => {
+        if (actiontype === DOWNLOAD_FILE) {
+          Toast.info(`正在下载文件\t${record.fileName}\t`);
+          this.downloadAction(actiontype, fileKey, record);
+        }
       }
-    }, () => {
-
-      if (actiontype === DOWNLOAD_FILE) {
-        Toast.info(`正在下载文件\t${record.fileName}\t`);
-        this.downloadAction(actiontype, fileKey, record);
-      }
-    })
-
-  }
+    );
+  };
 
   downloadAction = (actiontype, fileKey, record) => {
     const { spinObj } = this.state;
     axios({
       method: "POST",
-      url: app_cofig.renderCurrentFileRequestUrl + `?fileKey=${fileKey}&villageType=${record.villageKey}`,
-      responseType: 'blob',
-
-    }).then(res => {
-      const content = res.data;
-      const downloadUrl = URL.createObjectURL(content);
-      const link = document.createElement('a');
-      link.download = record.fileName + '.' + record.fileType;
-      link.href = downloadUrl;
-      link.click();
-      URL.revokeObjectURL(downloadUrl);
-      Toast.success(`下载文件\t${record.fileName}\t成功`);
-    }).catch(err => {
-      Toast.error(`下载文件\t${record.fileName}\t失败`);
-      console.error(`when try to download file\t${record.fileName}\t failed`, err);
-    }).finally(() => {
-      this.setState({
-        tableLoadingFlag: false,
-        spinObj: {
-          isLoading: false,
-          content: spinObj.content
-        }
-      })
+      url:
+        app_cofig.renderCurrentFileRequestUrl +
+        `?fileKey=${fileKey}&villageType=${record.villageKey}`,
+      responseType: "blob",
     })
-
-  }
+      .then((res) => {
+        const content = res.data;
+        const downloadUrl = URL.createObjectURL(content);
+        const link = document.createElement("a");
+        link.download = `${record.villageName}-${record.fileName}.${record.fileType}`;
+        link.href = downloadUrl;
+        link.click();
+        URL.revokeObjectURL(downloadUrl);
+        Toast.success(`下载文件\t${record.fileName}\t成功`);
+      })
+      .catch((err) => {
+        Toast.error(`下载文件\t${record.fileName}\t失败`);
+        console.error(
+          `when try to download file\t${record.fileName}\t failed`,
+          err
+        );
+      })
+      .finally(() => {
+        this.setState({
+          tableLoadingFlag: false,
+          spinObj: {
+            isLoading: false,
+            content: spinObj.content,
+          },
+        });
+      });
+  };
 
   closeView = () => {
     const { viewModel } = this.state;
@@ -426,82 +475,59 @@ export default class MainComponent extends React.Component {
         fileType: "",
         fileUrl: "",
         error: viewModel.error,
-        documentFlag: false
-      }
-    })
-  }
-
-  // remove, will schedule scan temp file in back end
-  cleanTempFile = () => {
-    // const
-  }
+        documentFlag: false,
+      },
+    });
+  };
 
   checkRenderFileType = (viewModel) => {
-    return viewModel.fileType === 'et' ? 'xls' : viewModel.fileType;
-  }
+    return viewModel.fileType === "et" ? "xls" : viewModel.fileType;
+  };
 
   autoFileNameDetect = (curInputStr) => {
-    const { currentVillageTypeKey, tableRequestParams, autoModel, spinObj } = this.state;
-    console.log("when auto search, village key ->", currentVillageTypeKey)
+    const { spinObj, tableLoadingFlag, autoModel, tableRequestParams } =
+      this.state;
 
-    // search files by input file name
-
-    axios.get(
-      app_cofig.fileListRequestUrl,
-      {
-        method: "GET",
-        params: {
-          fileName: curInputStr,
-          villageKey: currentVillageTypeKey
-        }
-      }
-    ).then(data => {
-      console.log('auto search', data);
-      let resData = data.data.data;
-      this.setState({
-        autoModel: {
-          currentVillageKey: currentVillageTypeKey,
-          searchData: resData.list.map(v => v.fileName),
-          searchValue: curInputStr
-        }
-      })
-    }).catch(error => {
-      console.error("auto complete error", error);
-    }).finally(() => {
-
-    })
     this.setState({
-      spinObj: {
-        isLoading: true,
-        content: spinObj.content
-      },
-      tableLoadingFlag: true,
       autoModel: {
-        searchValue: curInputStr
+        searchValue: curInputStr,
       },
       tableRequestParams: {
         fileName: curInputStr,
-        villageType: currentVillageTypeKey,
+        villageType: tableRequestParams.villageType,
         pageNum: tableRequestParams.pageNum,
-        pageSize: tableRequestParams.pageSize
-      }
-    }, () => {
-      this.fetchCurrentVillageTypeData();
-    })
-  }
+        pageSize: tableRequestParams.pageSize,
+      },
+    });
+  };
 
+  reloadingFileList = () => {
+    this.setState(
+      {
+        spinObj: {
+          isLoading: true,
+        },
+        tableLoadingFlag: true,
+        autoModel: {
+          isLoading: true,
+        },
+      },
+      () => {
+        this.fetchCurrentVillageTypeData();
+      }
+    );
+  };
 
   render() {
-    const
-      {
-        tableColumns,
-        responseTableData,
-        tableLoadingFlag,
-        viewModel,
-        rowSelection,
-        autoModel,
-        spinObj
-      } = this.state;
+    const {
+      tableColumns,
+      responseTableData,
+      tableLoadingFlag,
+      viewModel,
+      rowSelection,
+      autoModel,
+      spinObj,
+    } = this.state;
     let state = this.state;
     const { Header, Footer, Content } = Layout;
     return (
@@ -532,8 +558,8 @@ export default class MainComponent extends React.Component {
           visible={viewModel.documentFlag}
           onOk={this.closeView}
           onCancel={this.closeView}
-          className="custom-modal-body">
-
+          className="custom-modal-body"
+        >
           <div className="file-view-container">
             <FileViewer
               disable={false}
@@ -543,39 +569,45 @@ export default class MainComponent extends React.Component {
               onError={(e) => {
                 console.error(e);
               }}
-              unsupportedComponent={
-                () => {
-                  return <Empty
+              unsupportedComponent={() => {
+                return (
+                  <Empty
                     image={<IllustrationConstruction />}
                     darkModeImage={<IllustrationConstructionDark />}
-                    title={'不支持的预览类型'}
+                    title={"不支持的预览类型"}
                     description="暂不支持本类型文档预览"
                   />
-                }
-              }
+                );
+              }}
             />
           </div>
         </Modal>
 
         {/* 内容区域 */}
         <Layout className="main-layout">
-
           {/*  ContentSiderComponent */}
-          <Spin style={{ height: '100%' }} tip={spinObj.content} spinning={spinObj.isLoading}>
+          <Spin
+            style={{ height: "100%" }}
+            tip={spinObj.content}
+            spinning={spinObj.isLoading}
+          >
             {this.renderContentSiderComponent()}
           </Spin>
           <Content className="main-content">
-
             {this.renderUpLoadFileComponent(state.currentVillageTypeKey)}
             <div className="search-box">
               <AutoComplete
+                style={{ width: "360px" }}
                 showClear={true}
-                data={autoModel.searchData}
+                disabled={autoModel.isLoading}
+                loading={autoModel.isLoading}
+                data={[]}
                 value={autoModel.searchValue}
                 onChange={this.autoFileNameDetect}
-                prefix={<IconSearch />}
-                placeholder="搜索... "
-                size="large" />
+                prefix={<IconSearch onClick={this.reloadingFileList} />}
+                placeholder="输入后点击左侧搜索... "
+                size="large"
+              />
             </div>
 
             {/* 文件信息列表 */}
@@ -598,7 +630,6 @@ export default class MainComponent extends React.Component {
                 onPageChange: this.onPageChange,
               }}
             />
-
           </Content>
         </Layout>
 
@@ -614,7 +645,7 @@ export default class MainComponent extends React.Component {
             <span>{app_cofig.footerContent}</span>
           </span>
         </Footer>
-      </Layout >
+      </Layout>
     );
   }
 }

@@ -38,7 +38,7 @@ export default class LoadFileComponment extends React.Component {
       ? currentVillageTypeKey
       : this.props.currentVillageTypeKey;
     console.log("before upload file, village type is", villageKey);
-    console.log(file, fileList);
+    // console.log(file, fileList);
     return true;
   };
   onSuccess = (res, file, fileList) => {
@@ -71,8 +71,8 @@ export default class LoadFileComponment extends React.Component {
   };
 
   checkExceed = (fileList) => {
-    console.log("over", fileList);
-    fileList.splice(8).forEach((v) => {
+    // console.log("over", fileList);
+    fileList.splice(3).forEach((v) => {
       Notification.error({
         title: "超出单次限制",
         content: <div>文件{v.name}上传失败</div>,
@@ -135,7 +135,7 @@ export default class LoadFileComponment extends React.Component {
                     单文件最大支持<span className="notice-style">20mb</span>
                   </div>
                   <div>
-                    一次最多上传<span className="notice-style">8个</span>文件
+                    一次最多上传<span className="notice-style">{app_cofig.fileConfig.maxLimit}个</span>文件
                   </div>
                   <div>点击上传文件或拖拽文件到这里</div>
                 </div>

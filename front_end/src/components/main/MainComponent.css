@@ -2,6 +2,7 @@
   height: 100%;
   width: 100%;
   border: 1px solid var(--semi-color-border);
+  min-width: 1200px;
 }
 
 .footer-style {
@@ -32,6 +33,7 @@
   padding: 5px;
   overflow-y: hidden;
   padding: 20px;
+  /* min-width: 1200px; */
 }
 .main-content > .semi-layout-has-sider > .semi-layout,
 .semi-layout-has-sider > .semi-layout-content {
