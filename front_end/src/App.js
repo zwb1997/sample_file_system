@@ -1,21 +1,12 @@
 import React from "react";
-import Component from "react-dom";
-import logo from "./logo.svg";
 import "./App.css";
-
-import MainComponent from './components/main/MainComponent.js';
-
+import MainComponent from "./components/main/MainComponent.js";
 
 class App extends React.Component {
-  
   constructor(props) {
     super(props);
-    this.state = {
-
-    };
-
+    this.state = {};
   }
-
 
   render() {
     let values = this.state;

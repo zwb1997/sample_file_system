@@ -20,10 +20,10 @@ public class CustomInterceptor implements HandlerInterceptor {
             throws Exception {
 
         LOG.info("================= REQUEST ==============");
+        LOG.info("request time -> [{}]", DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss.SSS"));
         request.getHeaderNames().asIterator().forEachRemaining((headerName) -> {
             LOG.info("request -> header: [{}] value -> [{}]", headerName, request.getHeader(headerName));
         });
-        LOG.info("request time -> [{}]", DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss.SSS"));
         return true;
     }
 

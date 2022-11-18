@@ -25,6 +25,7 @@ import {
   Tooltip,
   Empty,
   Popconfirm,
+  Divider
 } from "@douyinfe/semi-ui";
 import {
   IllustrationConstruction,
@@ -140,7 +141,9 @@ export default class MainComponent extends React.Component {
                   }}
                   title="确定是否要保存此修改？"
                   content="此操作将删除源文件"
-                  onCancel={()=>{Toast.info('取消删除')}}
+                  onCancel={() => {
+                    Toast.info("取消删除");
+                  }}
                 >
                   <Button
                     theme="solid"
@@ -283,6 +286,7 @@ export default class MainComponent extends React.Component {
     } = this.state;
 
     // do get
+    let cSearchData = [];
     axios
       .get(app_cofig.fileListRequestUrl, {
         method: "GET",
@@ -306,10 +310,11 @@ export default class MainComponent extends React.Component {
                 let length = fileStrings.length;
                 let fName = fileStrings[0];
                 let fType = fileStrings[length - 1];
-
+                let cFileName = `${fName}.${fType}`;
+                cSearchData.push(cFileName);
                 return {
                   dataID: model.uuid,
-                  fileName: `${fName}.${fType}`,
+                  fileName: cFileName,
                   fileType: fType,
                   fileOriginalType: model.fileType,
                   fileSize: filesize(model.fileSize),
@@ -333,6 +338,7 @@ export default class MainComponent extends React.Component {
         this.setState({
           autoModel: {
             isLoading: false,
+            searchData: cSearchData,
           },
           spinObj: {
             isLoading: false,
@@ -495,7 +501,7 @@ export default class MainComponent extends React.Component {
       tableRequestParams: {
         fileName: curInputStr,
         villageType: tableRequestParams.villageType,
-        pageNum: tableRequestParams.pageNum,
+        pageNum: 1,
         pageSize: tableRequestParams.pageSize,
       },
     });
@@ -515,6 +521,19 @@ export default class MainComponent extends React.Component {
       () => {
         this.fetchCurrentVillageTypeData();
       }
+    );
+  };
+
+  autoCompleteRender = (item) => {
+    let style1 = {
+      width:'100%',
+      padding:'5px 10px 5px 10px'
+    }
+    return (
+      <div style={style1}>
+        <div>{item}</div>
+        <Divider />
+      </div>
     );
   };
 
@@ -601,12 +620,14 @@ export default class MainComponent extends React.Component {
                 showClear={true}
                 disabled={autoModel.isLoading}
                 loading={autoModel.isLoading}
-                data={[]}
+                data={autoModel.searchData}
                 value={autoModel.searchValue}
                 onChange={this.autoFileNameDetect}
                 prefix={<IconSearch onClick={this.reloadingFileList} />}
                 placeholder="输入后点击左侧搜索... "
-                size="large"
+                size="default"
+                position="bottomLeft"
+                renderItem={this.autoCompleteRender}
               />
             </div>
 

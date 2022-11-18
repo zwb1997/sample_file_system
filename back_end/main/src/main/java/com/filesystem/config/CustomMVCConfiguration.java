@@ -24,13 +24,8 @@ public class CustomMVCConfiguration implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // TODO Auto-generated method stub
-        registry.addResourceHandler("/t_files/**")
-                .addResourceLocations("classpath:/t_files/");
+        registry.addResourceHandler("/pub/**")
+                .addResourceLocations("classpath:public/");
     }
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        // TODO Auto-generated method stub
-        registry.addMapping("/t_files/**").allowedOrigins("*");
-    }
 }
