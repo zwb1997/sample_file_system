@@ -25,7 +25,7 @@ import {
   Tooltip,
   Empty,
   Popconfirm,
-  Divider
+  Divider,
 } from "@douyinfe/semi-ui";
 import {
   IllustrationConstruction,
@@ -493,7 +493,7 @@ export default class MainComponent extends React.Component {
   autoFileNameDetect = (curInputStr) => {
     const { spinObj, tableLoadingFlag, autoModel, tableRequestParams } =
       this.state;
-
+    curInputStr = curInputStr.trim();
     this.setState({
       autoModel: {
         searchValue: curInputStr,
@@ -526,15 +526,47 @@ export default class MainComponent extends React.Component {
 
   autoCompleteRender = (item) => {
     let style1 = {
-      width:'100%',
-      padding:'5px 10px 5px 10px'
-    }
+      width: "100%",
+      padding: "5px 10px 5px 10px",
+    };
     return (
       <div style={style1}>
         <div>{item}</div>
         <Divider />
       </div>
     );
+  };
+
+  refreshTable = () => {
+    const { currentVillageTypeKey, tableRequestParams, spinObj } = this.state;
+    this.setState(
+      {
+        tableRequestParams: {
+          fileName: "",
+          villageType: currentVillageTypeKey,
+          pageNum: 1,
+          pageSize: 5,
+        },
+        tableLoadingFlag: true,
+        spinObj: {
+          isLoading: true,
+          content: spinObj.content,
+        },
+        autoModel: {
+          isLoading: false,
+          searchData: [],
+        },
+      },
+      () => {
+        this.fetchCurrentVillageTypeData();
+      }
+    );
+  };
+
+  autoFileNamedKeyDown = (keyEvent) => {
+    if (keyEvent.key === "Enter" || keyEvent.code === "Enter") {
+      this.reloadingFileList();
+    }
   };
 
   render() {
@@ -612,8 +644,15 @@ export default class MainComponent extends React.Component {
           >
             {this.renderContentSiderComponent()}
           </Spin>
+
           <Content className="main-content">
-            {this.renderUpLoadFileComponent(state.currentVillageTypeKey)}
+            <Spin
+              style={{ height: "auto", width: "100px" }}
+              tip={spinObj.content}
+              spinning={spinObj.isLoading}
+            >
+              {this.renderUpLoadFileComponent(state.currentVillageTypeKey)}
+            </Spin>
             <div className="search-box">
               <AutoComplete
                 style={{ width: "360px" }}
@@ -623,12 +662,22 @@ export default class MainComponent extends React.Component {
                 data={autoModel.searchData}
                 value={autoModel.searchValue}
                 onChange={this.autoFileNameDetect}
+                onKeyDown={this.autoFileNamedKeyDown}
                 prefix={<IconSearch onClick={this.reloadingFileList} />}
                 placeholder="输入后点击左侧搜索... "
                 size="default"
                 position="bottomLeft"
                 renderItem={this.autoCompleteRender}
               />
+              <div>
+                <Button
+                  theme="solid"
+                  type="tertiary"
+                  onClick={this.refreshTable}
+                >
+                  重置
+                </Button>
+              </div>
             </div>
 
             {/* 文件信息列表 */}

@@ -42,7 +42,7 @@
             AND d.code_name = #{villageKey}
         </if>
         <if test="fileName != null and fileName !=''">
-            AND wf.`file_name` LIKE CONCAT(#{fileName},'%')
+            AND wf.file_name LIKE CONCAT(#{fileName},'%')
         </if>
         ORDER BY wf.`uuid`
     </select>
