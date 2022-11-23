@@ -51,7 +51,11 @@ export default class MainComponent extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      spinObj: {
+      fileUploadspinObj: {
+        isLoading: false,
+        content: "loading...",
+      },
+      searchSpinObj: {
         isLoading: false,
         content: "loading...",
       },
@@ -196,7 +200,8 @@ export default class MainComponent extends React.Component {
   }
 
   setCurrentVillageType = (villageType) => {
-    console.log("village type change?", villageType);
+    // console.log("village type change?", villageType);
+    const { fileUploadspinObj,searchSpinObj } = this.state;
     try {
       if (!villageType) {
         throw new Error("current village type is empty");
@@ -205,6 +210,14 @@ export default class MainComponent extends React.Component {
         {
           currentVillageTypeKey: villageType,
           tableLoadingFlag: true,
+          fileUploadspinObj: {
+            isLoading: true,
+            content: fileUploadspinObj.content,
+          },
+          searchSpinObj:{
+            isLoading: true,
+            content: searchSpinObj.content,
+          }
         },
         () => {
           // console.log(
@@ -238,13 +251,17 @@ export default class MainComponent extends React.Component {
   };
 
   reloadFileList = () => {
-    const { spinObj } = this.state;
+    const { fileUploadspinObj,searchSpinObj } = this.state;
     this.setState({
       tableLoadingFlag: true,
-      spinObj: {
+      fileUploadspinObj: {
         isLoading: true,
-        content: spinObj.content,
+        content: fileUploadspinObj.content,
       },
+      searchSpinObj:{
+        isLoading: true,
+        content: searchSpinObj.content,
+      }
     });
     this.fetchCurrentVillageTypeData();
   };
@@ -282,7 +299,8 @@ export default class MainComponent extends React.Component {
       responseTableData,
       tableRequestParams,
       currentVillageTypeKey,
-      spinObj,
+      fileUploadspinObj,
+      searchSpinObj
     } = this.state;
 
     // do get
@@ -340,9 +358,9 @@ export default class MainComponent extends React.Component {
             isLoading: false,
             searchData: cSearchData,
           },
-          spinObj: {
+          fileUploadspinObj: {
             isLoading: false,
-            content: spinObj.content,
+            content: fileUploadspinObj.content,
           },
           tableRequestParams: {
             fileName: "",
@@ -351,6 +369,10 @@ export default class MainComponent extends React.Component {
             pageSize: tableRequestParams.pageSize,
           },
           tableLoadingFlag: false,
+          searchSpinObj:{
+            isLoading:false,
+            content:searchSpinObj.content
+          }
         });
       });
   };
@@ -376,16 +398,16 @@ export default class MainComponent extends React.Component {
   };
 
   disableCurrentFile = (text, record, index) => {
-    const { spinObj } = this.state;
+    const { fileUploadspinObj } = this.state;
     // console.log("remove file", record);
     if (!record.villageKey) {
       throw new Error("when try to disable column, villageKey is empty!");
     }
     this.setState({
       tableLoadingFlag: true,
-      spinObj: {
+      fileUploadspinObj: {
         isLoading: true,
-        content: spinObj.content,
+        content: fileUploadspinObj.content,
       },
     });
     axios
@@ -409,23 +431,23 @@ export default class MainComponent extends React.Component {
       .finally(() => {
         this.setState({
           tableLoadingFlag: false,
-          spinObj: {
+          fileUploadspinObj: {
             isLoading: false,
-            content: spinObj.content,
+            content: fileUploadspinObj.content,
           },
         });
         this.fetchCurrentVillageTypeData();
       });
   };
   buildFileView = (actiontype, text, record, index) => {
-    const { spinObj } = this.state;
+    const { fileUploadspinObj } = this.state;
     let fileKey = record.dataID ? record.dataID : "";
     this.setState(
       {
         tableLoadingFlag: true,
-        spinObj: {
+        fileUploadspinObj: {
           isLoading: true,
-          content: spinObj.content,
+          content: fileUploadspinObj.content,
         },
       },
       () => {
@@ -438,7 +460,7 @@ export default class MainComponent extends React.Component {
   };
 
   downloadAction = (actiontype, fileKey, record) => {
-    const { spinObj } = this.state;
+    const { fileUploadspinObj } = this.state;
     axios({
       method: "POST",
       url:
@@ -450,7 +472,8 @@ export default class MainComponent extends React.Component {
         const content = res.data;
         const downloadUrl = URL.createObjectURL(content);
         const link = document.createElement("a");
-        link.download = `${record.villageName}-${record.fileName}.${record.fileType}`;
+        let fullCurrentFileName = this.checkCurrentFileName(record.fileName);
+        link.download = `${record.villageName}-${fullCurrentFileName}`;
         link.href = downloadUrl;
         link.click();
         URL.revokeObjectURL(downloadUrl);
@@ -466,12 +489,26 @@ export default class MainComponent extends React.Component {
       .finally(() => {
         this.setState({
           tableLoadingFlag: false,
-          spinObj: {
+          fileUploadspinObj: {
             isLoading: false,
-            content: spinObj.content,
+            content: fileUploadspinObj.content,
           },
         });
       });
+  };
+
+  checkCurrentFileName = (fileName) => {
+    let resultName = "";
+    let arr = fileName.split(".");
+    if (arr.length > 1) {
+      resultName = fileName;
+    } else if (arr.length === 1) {
+      resultName = arr[0] + ".txt";
+    } else {
+      resultName = "unknown.txt";
+    }
+
+    return resultName;
   };
 
   closeView = () => {
@@ -491,8 +528,12 @@ export default class MainComponent extends React.Component {
   };
 
   autoFileNameDetect = (curInputStr) => {
-    const { spinObj, tableLoadingFlag, autoModel, tableRequestParams } =
-      this.state;
+    const {
+      fileUploadspinObj,
+      tableLoadingFlag,
+      autoModel,
+      tableRequestParams,
+    } = this.state;
     curInputStr = curInputStr.trim();
     this.setState({
       autoModel: {
@@ -510,7 +551,7 @@ export default class MainComponent extends React.Component {
   reloadingFileList = () => {
     this.setState(
       {
-        spinObj: {
+        fileUploadspinObj: {
           isLoading: true,
         },
         tableLoadingFlag: true,
@@ -538,7 +579,8 @@ export default class MainComponent extends React.Component {
   };
 
   refreshTable = () => {
-    const { currentVillageTypeKey, tableRequestParams, spinObj } = this.state;
+    const { currentVillageTypeKey, tableRequestParams, fileUploadspinObj } =
+      this.state;
     this.setState(
       {
         tableRequestParams: {
@@ -548,9 +590,9 @@ export default class MainComponent extends React.Component {
           pageSize: 5,
         },
         tableLoadingFlag: true,
-        spinObj: {
+        fileUploadspinObj: {
           isLoading: true,
-          content: spinObj.content,
+          content: fileUploadspinObj.content,
         },
         autoModel: {
           isLoading: false,
@@ -577,7 +619,8 @@ export default class MainComponent extends React.Component {
       viewModel,
       rowSelection,
       autoModel,
-      spinObj,
+      fileUploadspinObj,
+      searchSpinObj
     } = this.state;
     let state = this.state;
     const { Header, Footer, Content } = Layout;
@@ -639,8 +682,8 @@ export default class MainComponent extends React.Component {
           {/*  ContentSiderComponent */}
           <Spin
             style={{ height: "100%" }}
-            tip={spinObj.content}
-            spinning={spinObj.isLoading}
+            tip={fileUploadspinObj.content}
+            spinning={fileUploadspinObj.isLoading}
           >
             {this.renderContentSiderComponent()}
           </Spin>
@@ -648,27 +691,32 @@ export default class MainComponent extends React.Component {
           <Content className="main-content">
             <Spin
               style={{ height: "auto", width: "100px" }}
-              tip={spinObj.content}
-              spinning={spinObj.isLoading}
+              tip={fileUploadspinObj.content}
+              spinning={fileUploadspinObj.isLoading}
             >
               {this.renderUpLoadFileComponent(state.currentVillageTypeKey)}
             </Spin>
             <div className="search-box">
-              <AutoComplete
-                style={{ width: "360px" }}
-                showClear={true}
-                disabled={autoModel.isLoading}
-                loading={autoModel.isLoading}
-                data={autoModel.searchData}
-                value={autoModel.searchValue}
-                onChange={this.autoFileNameDetect}
-                onKeyDown={this.autoFileNamedKeyDown}
-                prefix={<IconSearch onClick={this.reloadingFileList} />}
-                placeholder="输入后点击左侧搜索... "
-                size="default"
-                position="bottomLeft"
-                renderItem={this.autoCompleteRender}
-              />
+              <Spin
+                tip={searchSpinObj.content}
+                spinning={searchSpinObj.isLoading}
+              >
+                <AutoComplete
+                  style={{ width: "360px" }}
+                  showClear={true}
+                  loading={autoModel.isLoading}
+                  data={autoModel.searchData}
+                  value={autoModel.searchValue}
+                  onChange={this.autoFileNameDetect}
+                  onKeyDown={this.autoFileNamedKeyDown}
+                  prefix={<IconSearch onClick={this.reloadingFileList} />}
+                  placeholder="输入后点击左侧搜索... "
+                  size="default"
+                  position="bottomLeft"
+                  renderItem={this.autoCompleteRender}
+                  defaultOpen={false}
+                />
+              </Spin>
               <div>
                 <Button
                   theme="solid"
